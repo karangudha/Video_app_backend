@@ -1,6 +1,6 @@
-import mongoose, {Schema } from "mongoose";
+import mongoose, { Schema } from "mongoose";
 import bcrypt from "bcrypt";
-import { jsonwebtoken } from "jsonwebtoken";
+import jwt from "jsonwebtoken";
 const userSchema = new Schema(
     {
         username: {
@@ -18,7 +18,7 @@ const userSchema = new Schema(
             lowercase: true,
             trim: true
         },
-        fullname: {
+        fullName: {
             type: String,
             required: true,
             trim: true,
@@ -29,7 +29,7 @@ const userSchema = new Schema(
             required: true
         },
         coverimage: {
-            type: String, 
+            type: String,
         },
         watchHistory: [
             {
@@ -38,7 +38,7 @@ const userSchema = new Schema(
             }
         ],
         password: {
-            type: String, 
+            type: String,
             required: [true, 'Password is required']
         },
         refreshToken: {
@@ -50,16 +50,16 @@ const userSchema = new Schema(
     }
 );
 
-userSchema.pre("save", async function (next){
-    if(!this.isModified("password")) return next(); //skip password hashing if password is not modified
-    
+userSchema.pre("save", async function (next) {
+    if (!this.isModified("password")) return next(); //skip password hashing if password is not modified
+
     this.password = await bcrypt.hash(this.password, 10)
     next()
 })
 
 userSchema.methods.isPasswordCorrect = async function (password) {
     return await bcrypt.compare(password, this.password)
-} 
+}
 
 userSchema.methods.generateAccessToken = function () {
     return jwt.sign(
