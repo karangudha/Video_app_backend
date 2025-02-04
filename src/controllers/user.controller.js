@@ -10,7 +10,6 @@ const generateAccessTokenAndRefreshToken = async (userId) => {
         const user = await User.findById(userId);
         const accessToken = user.generateAccessToken();
         const refreshToken = user.generateRefreshToken();
-        console.log("refreshToken : ", refreshToken);
         user.refreshToken = refreshToken;
         await user.save({ validationBeforeSave: false });
         return { accessToken, refreshToken };
