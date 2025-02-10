@@ -136,7 +136,7 @@ const logoutUser = asyncHandler(async (req, res) => {
     await User.findByIdAndUpdate(
         req.user._id,
         {
-            $set: {
+            $unset: {
                 refreshToken: undefined,
             }
         },
@@ -153,7 +153,7 @@ const logoutUser = asyncHandler(async (req, res) => {
         .clearCookie("accessToken", options)
         .clearCookie("refreshToken", options)
         .json(
-            new ApiResponse(200, {}, "User logged in successfully")
+            new ApiResponse(200, {}, "User logged out successfully")
         )
 })
 
@@ -305,14 +305,14 @@ const updateUsercoverImage = asyncHandler(async (req, res) => {
 const getUserChannelProfile = asyncHandler(async (req, res) => {
     const { username } = req.params;
 
-    if (!username) {
+    if (!username.trim()) {
         throw new ApiError(400, "Invalid username")
     }
 
     const channel = await User.aggregate([
         {
             $match: {
-                username: "username?.toLowerCase()"
+                username: username?.toLowerCase()
             }
         },
         {

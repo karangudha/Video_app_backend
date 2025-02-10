@@ -41,8 +41,8 @@ router.route("/refresh-token").post(refreshAccessToken);
 router.route("/change-password").post(verifyJWT, changeCurrentPassword);
 router.route("/current-user").get(verifyJWT, getCurrentUser);
 router.route("/update-account-details").patch(verifyJWT, updateAccountDetails);
-router.route(("/avatar-update").patch(verifyJWT, upload.single("avatar"), updateUserAvatar));
-router.route(("/cover-image-update").patch(verifyJWT, upload.single("coverImage"), updateUsercoverImage));
+router.route("/avatar").patch(verifyJWT, upload.single("avatar"), updateUserAvatar);
+router.route("/cover-image-update").patch(verifyJWT, upload.single("coverImage"), updateUsercoverImage);
 router.route("/c/:username").get(verifyJWT, getUserChannelProfile);
 //here we are getting details form link that why we have to do like this.
 router.route("/history").get(verifyJWT, getWatchHistory);
