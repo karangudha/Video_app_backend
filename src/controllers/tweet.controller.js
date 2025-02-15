@@ -1,10 +1,9 @@
-import mongoose from "mongoose";
+import mongoose, { isValidObjectId } from "mongoose";
+import { User } from "../modles/user.model.js";
+import { Tweet } from "../models/tweet.model.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
-import { Comment } from "../models/comment.model.js";
-import { User } from "../modles/user.model.js";
-import { Tweet } from "../models/tweet.model.js";
 
 const createTweet = asyncHandler(async (req, res) => {
     const owner = req.user._id;
@@ -142,19 +141,22 @@ const getUserTweets = asyncHandler(async (req, res) => {
     }
 })
 
-const updateComment = asyncHandler(async (req, res) => {
+const updateTweet = asyncHandler(async (req, res) => {
     const { _id } = req.params;
     const content = req.body.content;
-    if (!content.trim()) {
-        throw new ApiError(400, "comment content is empty")
+    if (!isValidObjectId(_id)) {
+        return res.status(400).json({ error: "Invalid user ID format" });
     }
-    const comment = await Comment.findByIdAndUpdate(
+    if (!content.trim()) {
+        throw new ApiError(400, "tweet content is empty")
+    }
+    const tweet = await Comment.findByIdAndUpdate(
         _id,
         { content },
         { new: true }
     );
-    if (!comment) {
-        throw new ApiError(400, "comment not updated")
+    if (!tweet) {
+        throw new ApiError(400, "tweet not updated")
     }
 
     return res
@@ -162,25 +164,28 @@ const updateComment = asyncHandler(async (req, res) => {
         .json(
             new ApiResponse(
                 200,
-                comment,
-                "Comment updated successfully"
+                tweet,
+                "tweet updated successfully"
             )
         )
 })
 
-const deleteComment = asyncHandler(async (req, res) => {
+const deleteTweet = asyncHandler(async (req, res) => {
     const { _id } = req.params;
-    await Comment.findByIdAndDelete(_id);
+    if (!isValidObjectId(_id)) {
+        return res.status(400).json({ error: "Invalid user ID format" });
+    }
+    await Tweet.findByIdAndDelete(_id);
 
-    if (Comment.findById(_id))
-        throw new ApiError(400, "comment not deleted")
+    if (Tweet.findById(_id))
+        throw new ApiError(400, "tweet not deleted")
     return res
         .status(200)
         .json(
             new ApiResponse(
                 200,
                 {},
-                "Comment deleted successfully"
+                "tweet deleted successfully"
             )
         )
 })
@@ -188,6 +193,6 @@ const deleteComment = asyncHandler(async (req, res) => {
 export {
     createTweet,
     getUserTweets,
-    updateComment,
-    deleteComment,
+    updateTweet,
+    deleteTweet,
 }
