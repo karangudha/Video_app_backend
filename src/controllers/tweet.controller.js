@@ -1,6 +1,10 @@
+import mongoose from "mongoose";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
+import { Comment } from "../models/comment.model.js";
+import { User } from "../modles/user.model.js";
+import { Tweet } from "../models/tweet.model.js";
 
 const createTweet = asyncHandler(async (req, res) => {
     const owner = req.user._id;
@@ -184,4 +188,6 @@ const deleteComment = asyncHandler(async (req, res) => {
 export {
     createTweet,
     getUserTweets,
+    updateComment,
+    deleteComment,
 }
