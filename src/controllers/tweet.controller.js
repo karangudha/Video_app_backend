@@ -138,6 +138,49 @@ const getUserTweets = asyncHandler(async (req, res) => {
     }
 })
 
+const updateComment = asyncHandler(async (req, res) => {
+    const { _id } = req.params;
+    const content = req.body.content;
+    if (!content.trim()) {
+        throw new ApiError(400, "comment content is empty")
+    }
+    const comment = await Comment.findByIdAndUpdate(
+        _id,
+        { content },
+        { new: true }
+    );
+    if (!comment) {
+        throw new ApiError(400, "comment not updated")
+    }
+
+    return res
+        .status(200)
+        .json(
+            new ApiResponse(
+                200,
+                comment,
+                "Comment updated successfully"
+            )
+        )
+})
+
+const deleteComment = asyncHandler(async (req, res) => {
+    const { _id } = req.params;
+    await Comment.findByIdAndDelete(_id);
+
+    if (Comment.findById(_id))
+        throw new ApiError(400, "comment not deleted")
+    return res
+        .status(200)
+        .json(
+            new ApiResponse(
+                200,
+                {},
+                "Comment deleted successfully"
+            )
+        )
+})
+
 export {
     createTweet,
     getUserTweets,
