@@ -142,16 +142,16 @@ const getUserTweets = asyncHandler(async (req, res) => {
 })
 
 const updateTweet = asyncHandler(async (req, res) => {
-    const { _id } = req.params;
+    const { tweetId } = req.params;
     const content = req.body.content;
-    if (!isValidObjectId(_id)) {
+    if (!isValidObjectId(tweetId)) {
         return res.status(400).json({ error: "Invalid user ID format" });
     }
     if (!content.trim()) {
         throw new ApiError(400, "tweet content is empty")
     }
     const tweet = await Comment.findByIdAndUpdate(
-        _id,
+        tweetId,
         { content },
         { new: true }
     );
@@ -171,13 +171,13 @@ const updateTweet = asyncHandler(async (req, res) => {
 })
 
 const deleteTweet = asyncHandler(async (req, res) => {
-    const { _id } = req.params;
-    if (!isValidObjectId(_id)) {
+    const { tweetId } = req.params;
+    if (!isValidObjectId(tweetId)) {
         return res.status(400).json({ error: "Invalid user ID format" });
     }
-    await Tweet.findByIdAndDelete(_id);
+    await Tweet.findByIdAndDelete(tweetId);
 
-    if (Tweet.findById(_id))
+    if (Tweet.findById(tweetId))
         throw new ApiError(400, "tweet not deleted")
     return res
         .status(200)
