@@ -98,10 +98,82 @@ const getVideoComments = asyncHandler(async (req, res) => {
         select all comment 
         from comment collection 
         where video id = video_id 
+        make object of them 
+        return owner of that comment also,
+            in this owner username is displayed
+             -> for this find in owner collection
+             local field : owner
+             foreign field : _id
+             as : owner
+                take only username from here.
+            return it in object of comment
             
         make a list of them.
 
     */
+    const { videoId } = req.params;
+    const owner = req.user._id;
+
+    if (!videoId)
+        throw new ApiError(400, "video id is required");
+
+    try {
+        const comments = await Comment.aggregate([
+            {
+                $match: {
+                    video: videoId,
+                }
+            },
+            {
+                $lookup: {
+                    from: "users",
+                    localField: "owner",
+                    foreignField: "_id",
+                    as: "owner",
+                    pipeline: [
+                        {
+                            $project: {
+                                username: 1,
+                                avatar: 1,
+                            }
+                        }
+                    ]
+                }
+            },
+            {
+                $unwind: "$owner",
+            },
+            {
+                $project: {
+                    content: 1,
+                    createdAt: 1,
+                    owner: {
+                        username: "$owner.username",
+                        avatar: "$owner.avatar",
+                    }
+                }
+            },
+            {
+                $sort: { createdAt: -1 }
+            }
+        ]);
+
+        if (!comments.length) {
+            return res
+                .status(200)
+                .json(
+                    new ApiResponse(200, [], "No comments found for this video")
+                )
+        }
+
+        return res
+            .status(200)
+            .json(
+                new ApiResponse(200, comments, "comments of video fetched successfully")
+            )
+    } catch (error) {
+        throw new ApiError(500, error?.message || "failed to fetch comments of video")
+    }
 });
 
 
