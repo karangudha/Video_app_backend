@@ -95,20 +95,20 @@ const getUserChannelSubscribers = asyncHandler(async (req, res) => {
 
             how to create 
     */
-    const { channelId } = req.params;
+    const { subscriberId } = req.params;
 
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
     const skip = (page - 1) * limit;
 
     const totalSubscribersCount = await Subscription.countDocuments({
-        channel: channelId,
+        channel: subscriberId,
     });
 
     const subscribers = await Subscription.aggregate([
         {
             $match: {
-                channel: channelId,
+                channel: subscriberId,
             }
         },
         {
@@ -214,7 +214,7 @@ const getSubscribedChannels = asyncHandler(async (req, res) => {
     const channelSubscribed = await Subscription.aggregate([
         {
             $match: {
-                subscribe: subscriberId,
+                subscriber: subscriberId,
             }
         },
         {
@@ -225,9 +225,9 @@ const getSubscribedChannels = asyncHandler(async (req, res) => {
         },
         {
             $lookup: {
-                form: "users",
+                from: "users",
                 localField: "channel",
-                forgeinField: "_id",
+                foreignField: "_id",
                 as: "subscribedChannels",
                 pipeline: [
                     {
@@ -285,6 +285,25 @@ const getSubscribedChannels = asyncHandler(async (req, res) => {
 
 const getChannelDetails = asyncHandler(async (req, res) => {
     //get channnel details when clicked on channel/subscribered channel/ subscriber channel
+    /* 
+        ill get channelId from somewhere
+        means i have to fetch channel details from user collection
+        and remove some fields like password, createdAt, updatedAt, etc.
+        and project
+        and return it to frontend
+
+    */
+
+    const { channelId } = req.params;
+    const user = await User.findById(channelId).select("-password -createdAt -updatedAt");
+    if (!user)
+        throw new ApiError(404, "Channel not found");
+
+    return res
+        .status(200)
+        .json(
+            new ApiResponse(200, user, "Channel details fetched successfully")
+        )
 });
 
 export {
