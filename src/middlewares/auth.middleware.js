@@ -10,7 +10,7 @@ export const verifyJWT = asyncHandler(async (req, _, next) => {
             throw new ApiError(401, "No token found")
         }
 
-        const decodedJWT = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET)
+        const decodedJWT = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET) //verify is jwt method to decode token.
 
         const user = await User.findById(decodedJWT._id).select("-password -refreshToken");
         if (!user) {
